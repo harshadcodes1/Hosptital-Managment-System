@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Billing{% endblock %}
+{% block heading %}Billing{% endblock %}
+{% block actions %}<a class="btn" href="{{ url_for('bill_add') }}">Create bill</a>{% endblock %}
+{% block content %}
+<div class="stats">
+  <div class="stat"><div class="label">Billed</div><div class="value">{{ totals.billed|money }}</div></div>
+  <div class="stat"><div class="label">Collected</div><div class="value">{{ totals.paid|money }}</div></div>
+  <div class="stat warn"><div class="label">Outstanding</div><div class="value">{{ (totals.billed - totals.paid)|money }}</div></div>
+</div>
+<section class="card">
+  <form class="filters" method="get">
+    <label>Show
+      <select name="state" onchange="this.form.submit()">
+        <option value="">All bills</option>
+        <option value="unpaid" {{ 'selected' if state == 'unpaid' }}>Unpaid or partly paid</option>
+        <option value="paid" {{ 'selected' if state == 'paid' }}>Fully paid</option>
+      </select>
+    </label>
+    <noscript><button class="btn ghost" type="submit">Filter</button></noscript>
+  </form>
+  {% if rows %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Bill</th><th>Date</th><th>Patient</th><th>Description</th><th class="num">Amount</th><th class="num">Paid</th><th>Status</th><th></th></tr></thead>
+    <tbody>{% for b in rows %}{% set st = 'Paid' if b.paid >= b.amount else ('Partial' if b.paid > 0 else 'Pending') %}<tr>
+      <td><a href="{{ url_for('bill_detail', bid=b.id) }}">#{{ b.id }}</a></td>
+      <td>{{ b.created_at|nice_date }}</td>
+      <td><a href="{{ url_for('patient_detail', pid=b.patient_id) }}">{{ b.patient }}</a></td>
+      <td>{{ b.description }}</td>
+      <td class="num">{{ b.amount|money }}</td><td class="num">{{ b.paid|money }}</td>
+      <td><span class="badge {{ st }}">{{ st }}</span></td>
+      <td class="row-actions"><a class="btn ghost small" href="{{ url_for('bill_detail', bid=b.id) }}">{{ 'View' if st == 'Paid' else 'Record payment' }}</a></td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="empty">No bills found. <a href="{{ url_for('bill_add') }}">Create a bill</a>.</p>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block auth %}
+<div class="auth">
+  <section class="auth-art">
+    <span class="brand"><span class="brand-mark"></span>CareDesk</span>
+    <h1>Run the whole hospital desk from one place.</h1>
+    <p>Register patients, schedule doctors, book appointments and track payments.</p>
+  </section>
+  <section class="auth-form">
+    <form method="post">
+      <h2>Sign in to your account</h2>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}<div class="flash {{ cat }}" role="alert">{{ msg }}</div>{% endfor %}
+      {% endwith %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Username<input name="username" autocomplete="username" required autofocus></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="btn" type="submit">Sign in</button>
+      <p class="hint">Demo account: <strong>admin</strong> / <strong>admin123</strong>. Change it after signing in.</p>
+    </form>
+  </section>
+</div>
+{% endblock %}

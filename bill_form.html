@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Create bill{% endblock %}
+{% block heading %}Create bill{% endblock %}
+{% block content %}
+<form method="post" class="card form-grid">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label>Patient
+    <select name="patient_id" required>
+      <option value="">Choose a patient...</option>
+      {% for p in patients %}<option value="{{ p.id }}" {{ 'selected' if f.get('patient_id')|string == p.id|string }}>{{ p.name }} ({{ p.id|pid }})</option>{% endfor %}
+    </select>
+  </label>
+  <label>Add a doctor's consultation fee (optional)
+    <select id="fee-doctor">
+      <option value="">None</option>
+      {% for d in doctors %}<option data-fee="{{ d.fee }}" data-name="{{ d.name }}">{{ d.name }} - {{ d.fee|money }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="full">Description<input name="description" id="description" required value="{{ f.get('description', '') }}" placeholder="e.g. Consultation, lab tests, room charges"></label>
+  <label>Amount (₹)<input type="number" name="amount" id="amount" min="0.01" step="0.01" required value="{{ f.get('amount', '') }}"></label>
+  <div class="form-actions full">
+    <button class="btn" type="submit">Create bill</button>
+    <a class="btn ghost" href="{{ url_for('billing') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

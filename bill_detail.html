@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set balance = b.amount - b.paid %}
+{% set st = 'Paid' if balance <= 0 else ('Partial' if b.paid > 0 else 'Pending') %}
+{% block title %}Bill #{{ b.id }}{% endblock %}
+{% block heading %}Bill #{{ b.id }} <span class="badge {{ st }}">{{ st }}</span>{% endblock %}
+{% block actions %}
+  <button class="btn ghost" type="button" onclick="window.print()">Print</button>
+  <a class="btn ghost" href="{{ url_for('billing') }}">All bills</a>
+{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="invoice-head">
+    <div><h2>Billed to</h2>
+      <strong>{{ patient.name }}</strong> ({{ patient.id|pid }})<br>{{ patient.phone }}<br>{{ patient.address or '' }}</div>
+    <div><h2>Issued</h2>{{ b.created_at|nice_date }}</div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Description</th><th class="num">Amount</th></tr></thead>
+    <tbody><tr><td>{{ b.description }}</td><td class="num">{{ b.amount|money }}</td></tr></tbody>
+  </table></div>
+  <div class="totals">
+    <div><span>Total</span><span>{{ b.amount|money }}</span></div>
+    <div><span>Paid</span><span>{{ b.paid|money }}</span></div>
+    <div class="due"><span>Balance due</span><span>{{ balance|money }}</span></div>
+  </div>
+</section>
+<section class="card">
+  <h2>Payments</h2>
+  {% if pays %}<div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th>Method</th><th class="num">Amount</th></tr></thead>
+    <tbody>{% for p in pays %}<tr><td>{{ p.paid_on|nice_date }}</td><td>{{ p.method }}</td><td class="num">{{ p.amount|money }}</td></tr>{% endfor %}</tbody>
+  </table></div>{% else %}<p class="empty">No payments recorded yet.</p>{% endif %}
+</section>
+{% if balance > 0 %}
+<section class="card no-print">
+  <h2>Record a payment</h2>
+  <form method="post" action="{{ url_for('bill_pay', bid=b.id) }}" class="form-grid">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Amount (₹)<input type="number" name="amount" min="0.01" max="{{ balance }}" step="0.01" value="{{ balance }}" required></label>
+    <label>Method<select name="method" required>{% for m in PAY_METHODS %}<option>{{ m }}</option>{% endfor %}</select></label>
+    <div class="form-actions full"><button class="btn" type="submit">Record payment</button></div>
+  </form>
+</section>
+{% endif %}
+<form method="post" action="{{ url_for('bill_delete', bid=b.id) }}" class="no-print" style="margin-top:20px" data-confirm="Delete this bill and its payment records?">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <button class="btn danger small" type="submit">Delete bill</button>
+</form>
+{% endblock %}

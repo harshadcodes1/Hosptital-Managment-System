@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Doctors{% endblock %}
+{% block heading %}Doctors{% endblock %}
+{% block actions %}<a class="btn" href="{{ url_for('doctor_add') }}">Add doctor</a>{% endblock %}
+{% block content %}
+<section class="card">
+  {% if rows %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Doctor</th><th>Specialization</th><th>Working days</th><th>Hours</th><th class="num">Fee</th><th class="num">Upcoming</th><th></th></tr></thead>
+    <tbody>{% for d in rows %}<tr>
+      <td><strong>{{ d.name }}</strong><br><span class="muted">{{ d.phone or '' }}</span></td>
+      <td>{{ d.specialization }}</td>
+      <td>{{ d.available_days.replace(',', ', ') }}</td>
+      <td>{{ d.start_time|nice_time }} - {{ d.end_time|nice_time }}</td>
+      <td class="num">{{ d.fee|money }}</td>
+      <td class="num">{{ d.upcoming }}</td>
+      <td class="row-actions">
+        <a class="btn ghost small" href="{{ url_for('doctor_edit', did=d.id) }}">Edit</a>
+        <form class="inline" method="post" action="{{ url_for('doctor_delete', did=d.id) }}" data-confirm="Delete {{ d.name }} and all their appointments?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="btn danger small" type="submit">Delete</button>
+        </form>
+      </td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="empty">No doctors yet. <a href="{{ url_for('doctor_add') }}">Add the first doctor</a>.</p>{% endif %}
+</section>
+{% endblock %}

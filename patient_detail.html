@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ p.name }}{% endblock %}
+{% block heading %}{{ p.name }} <small class="muted">{{ p.id|pid }}</small>{% endblock %}
+{% block actions %}
+  <a class="btn ghost" href="{{ url_for('patient_edit', pid=p.id) }}">Edit</a>
+  <a class="btn ghost" href="{{ url_for('bill_add', patient_id=p.id) }}">Create bill</a>
+  <a class="btn" href="{{ url_for('appointment_add', patient_id=p.id) }}">Book appointment</a>
+{% endblock %}
+{% block content %}
+<section class="card">
+  <h2>Patient record</h2>
+  <dl class="dl">
+    <dt>Age and gender</dt><dd>{{ p.age }} years, {{ p.gender }}</dd>
+    <dt>Phone</dt><dd>{{ p.phone }}</dd>
+    <dt>Email</dt><dd>{{ p.email or '-' }}</dd>
+    <dt>Blood group</dt><dd>{{ p.blood_group or '-' }}</dd>
+    <dt>Address</dt><dd>{{ p.address or '-' }}</dd>
+    <dt>Medical history</dt><dd>{{ p.medical_history or '-' }}</dd>
+    <dt>Registered</dt><dd>{{ p.created_at|nice_date }}</dd>
+  </dl>
+</section>
+<section class="card">
+  <h2>Appointments</h2>
+  {% if appts %}<div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th>Doctor</th><th>Reason</th><th>Status</th></tr></thead>
+    <tbody>{% for a in appts %}<tr>
+      <td>{{ a.date|nice_date }}, {{ a.time|nice_time }}</td><td>{{ a.doctor }} <span class="muted">({{ a.specialization }})</span></td>
+      <td>{{ a.reason or '-' }}</td><td><span class="badge {{ a.status }}">{{ a.status }}</span></td></tr>{% endfor %}</tbody>
+  </table></div>{% else %}<p class="empty">No appointments for this patient yet.</p>{% endif %}
+</section>
+<section class="card">
+  <h2>Bills</h2>
+  {% if bills %}<div class="table-wrap"><table>
+    <thead><tr><th>Bill</th><th>Description</th><th class="num">Amount</th><th class="num">Paid</th><th>Status</th></tr></thead>
+    <tbody>{% for b in bills %}{% set st = 'Paid' if b.paid >= b.amount else ('Partial' if b.paid > 0 else 'Pending') %}<tr>
+      <td><a href="{{ url_for('bill_detail', bid=b.id) }}">#{{ b.id }}</a></td><td>{{ b.description }}</td>
+      <td class="num">{{ b.amount|money }}</td><td class="num">{{ b.paid|money }}</td><td><span class="badge {{ st }}">{{ st }}</span></td></tr>{% endfor %}</tbody>
+  </table></div>{% else %}<p class="empty">No bills for this patient yet.</p>{% endif %}
+</section>
+{% endblock %}

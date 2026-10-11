@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Reschedule appointment' if edit else 'Book appointment' }}{% endblock %}
+{% block heading %}{{ 'Reschedule appointment' if edit else 'Book appointment' }}{% endblock %}
+{% block content %}
+{% if not patients or not doctors %}
+  <section class="card"><p class="empty">You need at least one
+    {% if not patients %}<a href="{{ url_for('patient_add') }}">patient</a>{% endif %}{% if not patients and not doctors %} and one {% endif %}{% if not doctors %}<a href="{{ url_for('doctor_add') }}">doctor</a>{% endif %}
+    before booking.</p></section>
+{% else %}
+<form method="post" class="card form-grid">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label>Patient
+    <select name="patient_id" required>
+      <option value="">Choose a patient...</option>
+      {% for p in patients %}<option value="{{ p.id }}" {{ 'selected' if a and a.patient_id == p.id }}>{{ p.name }} ({{ p.id|pid }})</option>{% endfor %}
+    </select>
+  </label>
+  <label>Doctor
+    <select name="doctor_id" id="doctor-select" required>
+      <option value="">Choose a doctor...</option>
+      {% for d in doctors %}<option value="{{ d.id }}" data-schedule="{{ d.available_days.replace(',', ', ') }}, {{ d.start_time|nice_time }} - {{ d.end_time|nice_time }}" {{ 'selected' if a and a.doctor_id == d.id }}>{{ d.name }} - {{ d.specialization }}</option>{% endfor %}
+    </select>
+    <small class="muted" id="doctor-hint"></small>
+  </label>
+  <label>Date<input type="date" name="date" required {% if not edit %}min="{{ today }}"{% endif %} value="{{ a.date if a and a.date else '' }}"></label>
+  <label>Time<input type="time" name="time" required step="900" value="{{ a.time if a and a.time else '' }}"></label>
+  <label class="full">Reason for visit<textarea name="reason">{{ a.reason if a and a.reason else '' }}</textarea></label>
+  <div class="form-actions full">
+    <button class="btn" type="submit">{{ 'Save changes' if edit else 'Book appointment' }}</button>
+    <a class="btn ghost" href="{{ url_for('appointments') }}">Cancel</a>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

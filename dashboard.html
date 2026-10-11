@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block actions %}
+  <a class="btn ghost" href="{{ url_for('patient_add') }}">Register patient</a>
+  <a class="btn" href="{{ url_for('appointment_add') }}">Book appointment</a>
+{% endblock %}
+{% block content %}
+<div class="stats">
+  <div class="stat"><div class="label">Patients</div><div class="value">{{ stats.patients }}</div></div>
+  <div class="stat"><div class="label">Doctors</div><div class="value">{{ stats.doctors }}</div></div>
+  <div class="stat"><div class="label">Appointments today</div><div class="value">{{ stats.today }}</div></div>
+  <div class="stat"><div class="label">Collected</div><div class="value">{{ stats.collected|money }}</div></div>
+  <div class="stat warn"><div class="label">Outstanding</div><div class="value">{{ stats.outstanding|money }}</div></div>
+</div>
+<div class="cols">
+  <div>
+    <section class="card">
+      <h2>Upcoming appointments</h2>
+      {% if upcoming %}
+      <div class="table-wrap"><table>
+        <thead><tr><th>When</th><th>Patient</th><th>Doctor</th><th>Reason</th></tr></thead>
+        <tbody>{% for a in upcoming %}
+          <tr><td>{{ a.date|nice_date }}<br><span class="muted">{{ a.time|nice_time }}</span></td>
+          <td><a href="{{ url_for('patient_detail', pid=a.patient_id) }}">{{ a.patient }}</a></td>
+          <td>{{ a.doctor }}</td><td>{{ a.reason or '-' }}</td></tr>
+        {% endfor %}</tbody></table></div>
+      {% else %}<p class="empty">No upcoming appointments. <a href="{{ url_for('appointment_add') }}">Book one</a>.</p>{% endif %}
+    </section>
+    <section class="card">
+      <h2>Recent payments</h2>
+      {% if recent_payments %}
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Patient</th><th>Method</th><th class="num">Amount</th></tr></thead>
+        <tbody>{% for p in recent_payments %}
+          <tr><td>{{ p.paid_on|nice_date }}</td><td>{{ p.patient }}</td><td>{{ p.method }}</td><td class="num">{{ p.amount|money }}</td></tr>
+        {% endfor %}</tbody></table></div>
+      {% else %}<p class="empty">No payments recorded yet.</p>{% endif %}
+    </section>
+  </div>
+  <div>
+    <section class="card">
+      <h2>Appointments by status</h2>
+      {% for s, n in by_status.items() %}
+        <div class="bar-row"><span>{{ s }}</span><div class="bar {{ s }}"><span style="width:{{ (n / max_status * 100)|round|int }}%"></span></div><strong>{{ n }}</strong></div>
+      {% endfor %}
+    </section>
+    <section class="card">
+      <h2>Doctor workload</h2>
+      {% for d in by_doctor %}
+        <div class="bar-row"><span>{{ d.name }}<br><small class="muted">{{ d.specialization }}</small></span><div class="bar"><span style="width:{{ (d.n / max_doc * 100)|round|int }}%"></span></div><strong>{{ d.n }}</strong></div>
+      {% else %}<p class="empty">Add doctors to see workload.</p>{% endfor %}
+    </section>
+  </div>
+</div>
+{% endblock %}

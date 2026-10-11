@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit doctor' if edit else 'Add doctor' }}{% endblock %}
+{% block heading %}{{ 'Edit doctor' if edit else 'Add doctor' }}{% endblock %}
+{% block content %}
+<form method="post" class="card form-grid">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label>Full name<input name="name" required value="{{ d.name if d else '' }}" placeholder="Dr. Full Name"></label>
+  <label>Specialization<input name="specialization" required value="{{ d.specialization if d else '' }}"></label>
+  <label>Phone<input name="phone" type="tel" value="{{ d.phone if d and d.phone else '' }}"></label>
+  <label>Email<input name="email" type="email" value="{{ d.email if d and d.email else '' }}"></label>
+  <label class="full">Working days
+    <span class="days">{% for day in DAYS %}
+      <label><input type="checkbox" name="days" value="{{ day }}" {{ 'checked' if day in sel }}>{{ day }}</label>{% endfor %}
+    </span>
+  </label>
+  <label>Start time<input type="time" name="start_time" required value="{{ d.start_time if d else '09:00' }}"></label>
+  <label>End time<input type="time" name="end_time" required value="{{ d.end_time if d else '17:00' }}"></label>
+  <label>Consultation fee (₹)<input type="number" name="fee" min="0" step="0.01" value="{{ d.fee if d else '0' }}"></label>
+  <div class="form-actions full">
+    <button class="btn" type="submit">{{ 'Save changes' if edit else 'Add doctor' }}</button>
+    <a class="btn ghost" href="{{ url_for('doctors') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

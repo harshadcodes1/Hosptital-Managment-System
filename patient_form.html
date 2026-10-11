@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit patient' if edit else 'Register patient' }}{% endblock %}
+{% block heading %}{{ 'Edit patient' if edit else 'Register patient' }}{% endblock %}
+{% block content %}
+<form method="post" class="card form-grid">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label>Full name<input name="name" required value="{{ p.name if p else '' }}"></label>
+  <label>Age<input type="number" name="age" min="0" max="130" required value="{{ p.age if p else '' }}"></label>
+  <label>Gender
+    <select name="gender" required>
+      <option value="">Choose...</option>
+      {% for g in ['Male','Female','Other'] %}<option {{ 'selected' if p and p.gender == g }}>{{ g }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Phone<input name="phone" type="tel" required value="{{ p.phone if p else '' }}"></label>
+  <label>Email (optional)<input name="email" type="email" value="{{ p.email if p and p.email else '' }}"></label>
+  <label>Blood group
+    <select name="blood_group">
+      <option value="">Unknown</option>
+      {% for b in ['A+','A-','B+','B-','AB+','AB-','O+','O-'] %}<option {{ 'selected' if p and p.blood_group == b }}>{{ b }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="full">Address<input name="address" value="{{ p.address if p and p.address else '' }}"></label>
+  <label class="full">Medical history and allergies<textarea name="medical_history">{{ p.medical_history if p and p.medical_history else '' }}</textarea></label>
+  <div class="form-actions full">
+    <button class="btn" type="submit">{{ 'Save changes' if edit else 'Register patient' }}</button>
+    <a class="btn ghost" href="{{ url_for('patients') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

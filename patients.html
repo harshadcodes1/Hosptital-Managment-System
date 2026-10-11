@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block heading %}Patients{% endblock %}
+{% block actions %}<a class="btn" href="{{ url_for('patient_add') }}">Register patient</a>{% endblock %}
+{% block content %}
+<section class="card">
+  <form class="filters" method="get">
+    <label class="grow">Search by name, phone or patient ID<input type="search" name="q" value="{{ q }}" placeholder="e.g. Anita, 98111, P0001"></label>
+    <button class="btn ghost" type="submit">Search</button>
+    {% if q %}<a class="btn ghost" href="{{ url_for('patients') }}">Clear</a>{% endif %}
+  </form>
+  {% if rows %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Phone</th><th>Blood group</th><th></th></tr></thead>
+    <tbody>{% for p in rows %}
+      <tr>
+        <td>{{ p.id|pid }}</td>
+        <td><a href="{{ url_for('patient_detail', pid=p.id) }}">{{ p.name }}</a></td>
+        <td>{{ p.age }}</td><td>{{ p.gender }}</td><td>{{ p.phone }}</td><td>{{ p.blood_group or '-' }}</td>
+        <td class="row-actions">
+          <a class="btn ghost small" href="{{ url_for('patient_edit', pid=p.id) }}">Edit</a>
+          <form class="inline" method="post" action="{{ url_for('patient_delete', pid=p.id) }}" data-confirm="Delete {{ p.name }} and all their appointments and bills?">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="btn danger small" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="empty">{% if q %}No patients match "{{ q }}".{% else %}No patients yet. <a href="{{ url_for('patient_add') }}">Register the first patient</a>.{% endif %}</p>{% endif %}
+</section>
+{% endblock %}
